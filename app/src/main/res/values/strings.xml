@@ -7,4 +7,5 @@
     <string name="your_search_results">Your search results shall appear here</string>
     <string name="no_locations_added">No locations added</string>
     <string name="add_new">Add new</string>
+    <string name="close">Close</string>
 </resources>
