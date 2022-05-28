@@ -8,6 +8,7 @@ import android.view.inputmethod.InputMethodManager
 import androidx.fragment.app.Fragment
 import com.amartya.weather.BuildConfig
 import com.amartya.weather.R
+import com.amartya.weather.models.Current
 import com.google.android.material.snackbar.BaseTransientBottomBar
 import com.google.android.material.snackbar.Snackbar
 
@@ -18,6 +19,9 @@ private const val TAG = "MyWeatherAppLog"
 const val API_KEY = "c39bba18a6e9481f80f163931222705"
 const val BASE_URL = "https://api.weatherapi.com/v1/"
 const val ERR_GENERIC = "An unknown error has occurred"
+const val PREF_UNIT = "com.amartya.weather.PREF_UNIT"
+const val UNIT_IMPERIAL = "com.amartya.weather.UNIT_IMPERIAL"
+const val UNIT_METRIC = "com.amartya.weather.UNIT_METRIC"
 
 /**
  * Prevent any view to be clicked twice accidentally withing one second
@@ -67,4 +71,31 @@ fun logDebug(msg: String) {
  */
 fun logError(msg: String) {
     if (BuildConfig.DEBUG) Log.e(TAG, msg)
+}
+
+/**
+ * normalize image url
+ */
+fun String.normalizeUrl(): String {
+    return "https:/$this"
+}
+
+/**
+ * Get current temperature
+ */
+fun getCurrentTemp(current: Current?, unit: String?): String {
+    return when (unit) {
+        UNIT_IMPERIAL -> (current?.tempF ?: 0.0).toString() + "°F"
+        else -> (current?.tempC ?: 0.0).toString() + "°C"
+    }
+}
+
+/**
+ * Get feels like temp
+ */
+fun getFeelsLikeTemp(current: Current?, unit: String?): String {
+    return when (unit) {
+        UNIT_IMPERIAL -> (current?.feelslikeF ?: 0.0).toString() + "°F"
+        else -> (current?.feelslikeC ?: 0.0).toString() + "°C"
+    }
 }

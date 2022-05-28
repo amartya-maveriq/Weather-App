@@ -7,9 +7,9 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.amartya.weather.sealed.UiState
 import com.amartya.weather.models.Weather
 import com.amartya.weather.repositories.WeatherRepository
+import com.amartya.weather.sealed.UiState
 import com.amartya.weather.utils.ERR_GENERIC
 import com.amartya.weather.utils.logDebug
 import com.amartya.weather.utils.logError
@@ -95,7 +95,7 @@ class MainViewModel @Inject constructor(
     fun searchCity(text: String) {
         viewModelScope.launch {
             val api = weatherRepository.searchCity(text)
-            api.enqueue(object : Callback<List<com.amartya.weather.models.Location>>{
+            api.enqueue(object : Callback<List<com.amartya.weather.models.Location>> {
                 override fun onResponse(
                     call: Call<List<com.amartya.weather.models.Location>>,
                     response: Response<List<com.amartya.weather.models.Location>>
@@ -120,6 +120,7 @@ class MainViewModel @Inject constructor(
     fun resetWeatherFlow() {
         _weatherFlow.value = UiState.Idle
     }
+
     fun resetCityFlow() {
         _citiesFlow.value = UiState.Idle
     }

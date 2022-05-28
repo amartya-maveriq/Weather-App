@@ -12,19 +12,23 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import com.amartya.weather.R
-import com.amartya.weather.sealed.UiState
 import com.amartya.weather.databinding.FragmentHomeBinding
 import com.amartya.weather.models.Weather
+import com.amartya.weather.sealed.UiState
 import com.amartya.weather.utils.ERR_GENERIC
-import com.amartya.weather.utils.logDebug
+import com.amartya.weather.utils.getCurrentTemp
+import com.amartya.weather.utils.getFeelsLikeTemp
 import com.amartya.weather.utils.logError
+import com.amartya.weather.utils.normalizeUrl
 import com.amartya.weather.utils.showSnackbar
 import com.amartya.weather.viewmodels.MainViewModel
+import com.bumptech.glide.Glide
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
 @AndroidEntryPoint
 class HomeFragment : Fragment(R.layout.fragment_home) {
@@ -32,6 +36,9 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
     private lateinit var binding: FragmentHomeBinding
     private lateinit var fusedLocationClient: FusedLocationProviderClient
     private val viewModel by activityViewModels<MainViewModel>()
+
+    @Inject
+    lateinit var appUnit: String
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         binding = FragmentHomeBinding.bind(view)
@@ -63,7 +70,7 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
                         when (uiState) {
                             is UiState.Success -> {
                                 (uiState.obj as? Weather)?.let { weather ->
-                                    logDebug(weather.toString())
+                                    setCurrentWeather(weather)
                                 }
                                 viewModel.resetWeatherFlow()
                             }
@@ -85,6 +92,21 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
         }
     }
 
+    private fun setCurrentWeather(weather: Weather) {
+        with(binding.layoutCurrentWeather) {
+            tvLocationName.text = weather.location?.name ?: "--"
+            tvLocationTemp.text = getCurrentTemp(
+                weather.current, appUnit
+            )
+            Glide.with(requireContext()).load(weather.current?.condition?.icon?.normalizeUrl())
+                .into(ivWeatherIcon)
+            tvLocationForecast.text = weather.current?.condition?.text ?: "--"
+            tvFeelsLike.text = "Feels like " + getFeelsLikeTemp(
+                weather.current, appUnit
+            )
+        }
+    }
+
     private fun getLastKnownLocation() {
         if (this::fusedLocationClient.isInitialized) {
             viewModel.getUserLocation(fusedLocationClient)
@@ -97,7 +119,8 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
     ) == PackageManager.PERMISSION_GRANTED
 
     private val locationPermissionRequest = registerForActivityResult(
-        ActivityResultContracts.RequestMultiplePermissions()) { permissions ->
+        ActivityResultContracts.RequestMultiplePermissions()
+    ) { permissions ->
         when {
             permissions.getOrDefault(Manifest.permission.ACCESS_COARSE_LOCATION, false) -> {
                 // location perm granted

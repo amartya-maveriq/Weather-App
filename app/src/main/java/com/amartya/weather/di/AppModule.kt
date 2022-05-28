@@ -1,10 +1,13 @@
 package com.amartya.weather.di
 
 import android.content.Context
+import android.content.SharedPreferences
 import androidx.room.Room
+import com.amartya.weather.R
 import com.amartya.weather.api.ApiService
 import com.amartya.weather.db.AppDatabase
 import com.amartya.weather.utils.BASE_URL
+import com.amartya.weather.utils.PREF_UNIT
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -37,4 +40,18 @@ object AppModule {
     @Singleton
     @Provides
     fun provideLocationDao(db: AppDatabase) = db.locationDao()
+
+    @Singleton
+    @Provides
+    fun provideSharedPref(@ApplicationContext context: Context): SharedPreferences =
+        context.getSharedPreferences(
+            context.getString(R.string.shared_pref_file),
+            Context.MODE_PRIVATE
+        )
+
+    @Singleton
+    @Provides
+    fun getUnit(sharedPreferences: SharedPreferences): String {
+        return sharedPreferences.getString(PREF_UNIT, "") ?: ""
+    }
 }
