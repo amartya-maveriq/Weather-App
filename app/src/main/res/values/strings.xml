@@ -9,4 +9,5 @@
     <string name="no_locations_added">No locations added</string>
     <string name="add_new">Add new</string>
     <string name="close">Close</string>
+    <string name="three_day_forecast">3-day forecast</string>
 </resources>

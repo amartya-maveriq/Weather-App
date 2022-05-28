@@ -10,7 +10,10 @@ import retrofit2.http.Query
 interface ApiService {
 
     @GET("forecast.json?key=$API_KEY")
-    fun getForecast(@Query("q") latLng: String): Call<Weather>
+    fun getForecast(
+        @Query("q") latLng: String,
+        @Query("days") days: Int = 7
+    ): Call<Weather>
 
     @GET("search.json?key=$API_KEY")
     fun searchLocation(@Query("q") text: String): Call<List<Location>>

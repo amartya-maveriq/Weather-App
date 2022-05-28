@@ -6,18 +6,23 @@ import android.os.Bundle
 import android.view.View
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
+import androidx.recyclerview.widget.LinearLayoutManager
 import com.amartya.weather.R
+import com.amartya.weather.adapters.ForecastAdapter
 import com.amartya.weather.databinding.FragmentHomeBinding
+import com.amartya.weather.models.Forecast
 import com.amartya.weather.models.Weather
 import com.amartya.weather.sealed.UiState
 import com.amartya.weather.utils.ERR_GENERIC
 import com.amartya.weather.utils.getCurrentTemp
 import com.amartya.weather.utils.getFeelsLikeTemp
+import com.amartya.weather.utils.logDebug
 import com.amartya.weather.utils.logError
 import com.amartya.weather.utils.normalizeUrl
 import com.amartya.weather.utils.showSnackbar
@@ -71,6 +76,7 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
                             is UiState.Success -> {
                                 (uiState.obj as? Weather)?.let { weather ->
                                     setCurrentWeather(weather)
+                                    setForecast(weather.forecast)
                                 }
                                 viewModel.resetWeatherFlow()
                             }
@@ -98,12 +104,36 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
             tvLocationTemp.text = getCurrentTemp(
                 weather.current, appUnit
             )
-            Glide.with(requireContext()).load(weather.current?.condition?.icon?.normalizeUrl())
+            Glide.with(requireContext())
+                .load(weather.current?.condition?.icon?.normalizeUrl())
                 .into(ivWeatherIcon)
+                .onLoadFailed(
+                    ContextCompat.getDrawable(
+                        requireContext(),
+                        R.drawable.ic_baseline_error_24
+                    )
+                )
             tvLocationForecast.text = weather.current?.condition?.text ?: "--"
             tvFeelsLike.text = "Feels like " + getFeelsLikeTemp(
                 weather.current, appUnit
             )
+        }
+    }
+
+    private fun setForecast(forecast: Forecast?) {
+        with(binding.layoutForecast) {
+            forecast?.forecastday?.let { days ->
+                logDebug("size: ${days.size}")
+                rvForecast.apply {
+                    layoutManager = LinearLayoutManager(requireContext())
+                    adapter = ForecastAdapter(
+                        forecastDays = days,
+                        requestManager = Glide.with(requireContext()),
+                        appUnit = appUnit
+                    )
+                }
+            }
+
         }
     }
 

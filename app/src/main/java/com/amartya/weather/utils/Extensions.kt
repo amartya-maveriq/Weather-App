@@ -9,6 +9,7 @@ import androidx.fragment.app.Fragment
 import com.amartya.weather.BuildConfig
 import com.amartya.weather.R
 import com.amartya.weather.models.Current
+import com.amartya.weather.models.Day
 import com.google.android.material.snackbar.BaseTransientBottomBar
 import com.google.android.material.snackbar.Snackbar
 
@@ -97,5 +98,25 @@ fun getFeelsLikeTemp(current: Current?, unit: String?): String {
     return when (unit) {
         UNIT_IMPERIAL -> (current?.feelslikeF ?: 0.0).toString() + "°F"
         else -> (current?.feelslikeC ?: 0.0).toString() + "°C"
+    }
+}
+
+/**
+ * Get max temp
+ */
+fun getMaxTemp(day: Day?, unit: String): String {
+    return when(unit) {
+        UNIT_IMPERIAL -> "H " + (day?.maxtempF ?: 0.0).toString() + "°F"
+        else -> "H " + (day?.maxtempC ?: 0.0).toString() + "°C"
+    }
+}
+
+/**
+ * Get min temp
+ */
+fun getMinTemp(day: Day?, unit: String): String {
+    return when(unit) {
+        UNIT_IMPERIAL -> "L " + (day?.mintempF ?: 0.0).toString() + "°F"
+        else -> "L " + (day?.mintempC ?: 0.0).toString() + "°C"
     }
 }
