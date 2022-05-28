@@ -18,14 +18,5 @@
         android:id="@+id/citiesFragment"
         android:name="com.amartya.weather.views.CitiesFragment"
         android:label="fragment_cities"
-        tools:layout="@layout/fragment_cities" >
-        <action
-            android:id="@+id/action_citiesFragment_to_searchFragment"
-            app:destination="@id/searchFragment" />
-    </fragment>
-    <fragment
-        android:id="@+id/searchFragment"
-        android:name="com.amartya.weather.views.SearchFragment"
-        android:label="fragment_search"
-        tools:layout="@layout/fragment_search" />
+        tools:layout="@layout/fragment_cities" />
 </navigation>

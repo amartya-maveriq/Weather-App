@@ -7,21 +7,29 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.amartya.weather.UiState
+import com.amartya.weather.sealed.UiState
 import com.amartya.weather.models.Weather
 import com.amartya.weather.repositories.WeatherRepository
+import com.amartya.weather.utils.ERR_GENERIC
+import com.amartya.weather.utils.logDebug
+import com.amartya.weather.utils.logError
 import com.google.android.gms.location.FusedLocationProviderClient
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
+import javax.inject.Inject
 
 /**
  * Shared viewModel for MainActivity and it's fragments
  */
-class MainViewModel: ViewModel() {
+@HiltViewModel
+class MainViewModel @Inject constructor(
+    private val weatherRepository: WeatherRepository
+) : ViewModel() {
 
     private val _location = MutableLiveData<Location?>()
     val location: LiveData<Location?> = _location
@@ -29,13 +37,19 @@ class MainViewModel: ViewModel() {
     private val _weatherFlow = MutableStateFlow<UiState>(UiState.Idle)
     val weatherFlow: StateFlow<UiState> = _weatherFlow
 
+    private val _citiesFlow = MutableStateFlow<UiState>(UiState.Idle)
+    val citiesFlow: StateFlow<UiState> = _citiesFlow
+
+    private val _searchResults = MutableLiveData<List<com.amartya.weather.models.Location>?>()
+    val searchResults: LiveData<List<com.amartya.weather.models.Location>?> = _searchResults
+
     @SuppressLint("MissingPermission")
     fun getUserLocation(fusedLocationProviderClient: FusedLocationProviderClient) {
         viewModelScope.launch {
             fusedLocationProviderClient.lastLocation
                 .addOnSuccessListener {
                     if (it == null) {
-                        Log.d("MSG", "getUserLocation: null")
+                        logDebug("getUserLocation: null")
                     }
                     _location.postValue(it)
                 }
@@ -48,8 +62,8 @@ class MainViewModel: ViewModel() {
     fun fetchWeather(location: Location) {
         viewModelScope.launch {
             _weatherFlow.value = UiState.Loading
-            val api = WeatherRepository.getWeather(location)
-            api.enqueue(object : Callback<Weather>{
+            val api = weatherRepository.getWeather(location)
+            api.enqueue(object : Callback<Weather> {
                 override fun onResponse(call: Call<Weather>, response: Response<Weather>) {
                     _weatherFlow.value = UiState.Success(response.body())
                 }
@@ -63,9 +77,50 @@ class MainViewModel: ViewModel() {
     }
 
     /**
+     * Fetch list of favorite cities
+     */
+    fun getFavoriteCities() {
+        viewModelScope.launch {
+            runCatching {
+                _citiesFlow.value = UiState.Success(weatherRepository.getFavoriteCities())
+            }.onFailure {
+                _citiesFlow.value = UiState.Error(it)
+            }
+        }
+    }
+
+    /**
+     * Search for a typed location
+     */
+    fun searchCity(text: String) {
+        viewModelScope.launch {
+            val api = weatherRepository.searchCity(text)
+            api.enqueue(object : Callback<List<com.amartya.weather.models.Location>>{
+                override fun onResponse(
+                    call: Call<List<com.amartya.weather.models.Location>>,
+                    response: Response<List<com.amartya.weather.models.Location>>
+                ) {
+                    _searchResults.postValue(response.body())
+                }
+
+                override fun onFailure(
+                    call: Call<List<com.amartya.weather.models.Location>>,
+                    t: Throwable
+                ) {
+                    _searchResults.postValue(null)
+                    logError(t.message ?: ERR_GENERIC)
+                }
+            })
+        }
+    }
+
+    /**
      * reset state
      */
     fun resetWeatherFlow() {
         _weatherFlow.value = UiState.Idle
+    }
+    fun resetCityFlow() {
+        _citiesFlow.value = UiState.Idle
     }
 }

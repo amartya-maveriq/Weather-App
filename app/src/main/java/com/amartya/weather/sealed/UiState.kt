@@ -1,4 +1,4 @@
-package com.amartya.weather
+package com.amartya.weather.sealed
 
 sealed class UiState {
     data class Success(val obj: Any?): UiState()

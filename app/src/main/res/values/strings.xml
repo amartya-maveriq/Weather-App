@@ -3,4 +3,8 @@
     <string name="my_location">My Location</string>
     <string name="favorites">Favorites</string>
     <string name="search">Search</string>
+    <string name="grapple">grapple</string>
+    <string name="your_search_results">Your search results shall appear here</string>
+    <string name="no_locations_added">No locations added</string>
+    <string name="add_new">Add new</string>
 </resources>

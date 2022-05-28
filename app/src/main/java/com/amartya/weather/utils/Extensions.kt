@@ -1,9 +1,11 @@
 package com.amartya.weather.utils
 
-import android.app.Activity
+import android.content.Context
 import android.os.SystemClock
 import android.util.Log
 import android.view.View
+import android.view.inputmethod.InputMethodManager
+import androidx.fragment.app.Fragment
 import com.amartya.weather.BuildConfig
 import com.amartya.weather.R
 import com.google.android.material.snackbar.BaseTransientBottomBar
@@ -12,6 +14,7 @@ import com.google.android.material.snackbar.Snackbar
 
 // list of constants used in the app
 private const val CLICK_DEBOUNCE_DELAY = 1000L
+private const val TAG = "MyWeatherAppLog"
 const val API_KEY = "c39bba18a6e9481f80f163931222705"
 const val BASE_URL = "https://api.weatherapi.com/v1/"
 const val ERR_GENERIC = "An unknown error has occurred"
@@ -33,6 +36,15 @@ fun View.clickWithDebounce(debounceTime: Long = CLICK_DEBOUNCE_DELAY, action: (V
 }
 
 /**
+ * Hide keyboard from any Fragment
+ */
+fun Fragment.hideKeyboard() {
+    val imm: InputMethodManager? =
+        requireContext().getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager?
+    imm?.hideSoftInputFromWindow(requireView().windowToken, 0)
+}
+
+/**
  * show Snackbar
  */
 fun showSnackbar(view: View, msg: String, isPositive: Boolean) {
@@ -46,13 +58,13 @@ fun showSnackbar(view: View, msg: String, isPositive: Boolean) {
 /**
  * log debug
  */
-fun Activity.logd(msg: String) {
-    if (BuildConfig.DEBUG) Log.d(this::class.java.name, msg)
+fun logDebug(msg: String) {
+    if (BuildConfig.DEBUG) Log.d(TAG, msg)
 }
 
 /**
  * log error
  */
-fun Activity.loge(msg: String) {
-    if (BuildConfig.DEBUG) Log.e(this::class.java.name, msg)
+fun logError(msg: String) {
+    if (BuildConfig.DEBUG) Log.e(TAG, msg)
 }
