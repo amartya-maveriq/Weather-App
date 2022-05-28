@@ -47,6 +47,9 @@ dependencies {
     // coroutine
     implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-android:1.5.2'
 
+    // lifecycle runtime
+    implementation 'androidx.lifecycle:lifecycle-runtime-ktx:2.4.1'
+
     // nav host fragment
     def nav_version = "2.4.2"
     implementation "androidx.navigation:navigation-fragment-ktx:$nav_version"

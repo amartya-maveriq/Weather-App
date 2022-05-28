@@ -14,6 +14,7 @@ import com.google.android.material.snackbar.Snackbar
 private const val CLICK_DEBOUNCE_DELAY = 1000L
 const val API_KEY = "c39bba18a6e9481f80f163931222705"
 const val BASE_URL = "https://api.weatherapi.com/v1/"
+const val ERR_GENERIC = "An unknown error has occurred"
 
 /**
  * Prevent any view to be clicked twice accidentally withing one second

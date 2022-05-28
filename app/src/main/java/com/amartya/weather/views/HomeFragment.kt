@@ -10,12 +10,17 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.lifecycleScope
 import com.amartya.weather.R
+import com.amartya.weather.UiState
 import com.amartya.weather.databinding.FragmentHomeBinding
+import com.amartya.weather.models.Weather
+import com.amartya.weather.utils.ERR_GENERIC
+import com.amartya.weather.utils.logd
 import com.amartya.weather.utils.loge
 import com.amartya.weather.utils.showSnackbar
 import com.amartya.weather.viewmodels.MainViewModel
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
+import kotlinx.coroutines.flow.collect
 
 class HomeFragment : Fragment(R.layout.fragment_home) {
 
@@ -43,6 +48,27 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
             viewModel.location.observe(requireActivity()) { location ->
                 location?.let {
                     viewModel.fetchWeather(it)
+                }
+            }
+            viewModel.weatherFlow.collect { uiState ->
+                when (uiState) {
+                    is UiState.Success -> {
+                        (uiState.obj as? Weather)?.let { weather ->
+                            requireActivity().logd(weather.toString())
+                        }
+                        viewModel.resetWeatherFlow()
+                    }
+                    is UiState.Error -> {
+                        showSnackbar(
+                            binding.root,
+                            uiState.throwable.message ?: ERR_GENERIC,
+                            false
+                        )
+                        viewModel.resetWeatherFlow()
+                    }
+                    else -> {
+                        // added to avoid warning
+                    }
                 }
             }
         }
