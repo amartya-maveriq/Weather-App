@@ -54,6 +54,13 @@ class WeatherRepository @Inject constructor(
     }
 
     /**
+     * Delete from fav cities
+     */
+    suspend fun deleteFromFavCities(location: com.amartya.weather.models.Location) = withContext(IO) {
+        locationDao.delete(location)
+    }
+
+    /**
      * Search for a city
      */
     suspend fun searchCity(text: String) = withContext(IO) {

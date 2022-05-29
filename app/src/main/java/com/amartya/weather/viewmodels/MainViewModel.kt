@@ -123,6 +123,19 @@ class MainViewModel @Inject constructor(
     }
 
     /**
+     * Delete from fav cities
+     */
+    fun deleteFromFavCities(location: com.amartya.weather.models.Location) {
+        viewModelScope.launch {
+            runCatching {
+                weatherRepository.deleteFromFavCities(location)
+            }.onFailure {
+                logError(it.message ?: ERR_GENERIC)
+            }
+        }
+    }
+
+    /**
      * Search for a typed location
      */
     fun searchCity(text: String) {
