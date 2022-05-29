@@ -14,7 +14,7 @@ import com.bumptech.glide.RequestManager
 class ForecastAdapter(
     private val forecastDays: MutableList<Forecastday> = mutableListOf(),
     private val requestManager: RequestManager,
-    private val appUnit: String
+    private var appUnit: String
 ) : RecyclerView.Adapter<ForecastAdapter.ForecastViewHolder>() {
 
     @SuppressLint("NotifyDataSetChanged")
@@ -24,6 +24,10 @@ class ForecastAdapter(
             addAll(daysList)
         }
         notifyDataSetChanged()
+    }
+
+    fun updateUnit(unit: String) {
+        this.appUnit = unit
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ForecastViewHolder {

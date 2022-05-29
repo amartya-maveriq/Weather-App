@@ -24,6 +24,8 @@ import com.amartya.weather.models.Weather
 import com.amartya.weather.sealed.UiState
 import com.amartya.weather.utils.ERR_GENERIC
 import com.amartya.weather.utils.PREF_LOC_NAME
+import com.amartya.weather.utils.PREF_UNIT
+import com.amartya.weather.utils.UNIT_METRIC
 import com.amartya.weather.utils.clickWithDebounce
 import com.amartya.weather.utils.getCurrentTemp
 import com.amartya.weather.utils.getFeelsLikeTemp
@@ -42,7 +44,7 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @AndroidEntryPoint
-class HomeFragment : Fragment(R.layout.fragment_home) {
+class HomeFragment : Fragment(R.layout.fragment_home), SettingsBottomSheet.DismissListener {
 
     private lateinit var binding: FragmentHomeBinding
 
@@ -58,12 +60,9 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
     private val forecastAdapter by lazy {
         ForecastAdapter(
             requestManager = requestManager,
-            appUnit = appUnit
+            appUnit = sharedPreferences.getString(PREF_UNIT, "") ?: ""
         )
     }
-
-    @Inject
-    lateinit var appUnit: String
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         binding = FragmentHomeBinding.bind(view)
@@ -83,6 +82,13 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
         binding.ivList.clickWithDebounce {
             requireView().findNavController()
                 .navigate(HomeFragmentDirections.actionHomeFragmentToCitiesFragment())
+        }
+
+        binding.ivSettings.clickWithDebounce {
+            SettingsBottomSheet(this).show(
+                requireActivity().supportFragmentManager,
+                SettingsBottomSheet::class.java.simpleName
+            )
         }
 
         observeViewModel()
@@ -139,8 +145,9 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
     private fun setCurrentWeather(weather: Weather) {
         with(binding.layoutCurrentWeather) {
             tvLocationName.text = weather.location?.name ?: "--"
+            tvLocationCountry.text = weather.location?.country ?: "--"
             tvLocationTemp.text = getCurrentTemp(
-                weather.current, appUnit
+                weather.current, sharedPreferences.getString(PREF_UNIT, "") ?: ""
             )
             val url = weather.current?.condition?.icon?.normalizeUrl()
             requestManager
@@ -154,13 +161,14 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
                 )
             tvLocationForecast.text = weather.current?.condition?.text ?: "--"
             tvFeelsLike.text = "Feels like " + getFeelsLikeTemp(
-                weather.current, appUnit
+                weather.current, sharedPreferences.getString(PREF_UNIT, "") ?: ""
             )
         }
     }
 
     private fun setForecast(forecast: Forecast?) {
         forecast?.forecastday?.let { days ->
+            forecastAdapter.updateUnit(sharedPreferences.getString(PREF_UNIT, "") ?: UNIT_METRIC)
             forecastAdapter.setDays(days)
         }
     }
@@ -180,13 +188,14 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
 
     private fun setWind(current: Current?) {
         with(binding.layoutWind) {
-            tvWind.text = getWindSpeed(current, appUnit)
+            tvWind.text = getWindSpeed(current, sharedPreferences.getString(PREF_UNIT, "") ?: "")
             tvWindDir.text = "Direction ${current?.windDir ?: "N/A"}"
         }
     }
 
     private fun setVisibility(current: Current?) {
-        binding.layoutVisibility.tvVisibility.text = getVisibility(current, appUnit)
+        binding.layoutVisibility.tvVisibility.text =
+            getVisibility(current, sharedPreferences.getString(PREF_UNIT, "") ?: "")
     }
 
     private fun getLastKnownLocation() {
@@ -213,5 +222,9 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
                 showSnackbar(view = binding.root, msg = message, false)
             }
         }
+    }
+
+    override fun onDismissed() {
+        getLastKnownLocation()
     }
 }

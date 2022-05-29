@@ -118,6 +118,7 @@ class CityDetailsFragment : Fragment(R.layout.fragment_city_details) {
     private fun setCurrentWeather(weather: Weather) {
         with(binding.layoutCurrentWeather) {
             tvLocationName.text = weather.location?.name ?: "--"
+            tvLocationCountry.text = weather.location?.country ?: "--"
             tvLocationTemp.text = getCurrentTemp(
                 weather.current, appUnit
             )

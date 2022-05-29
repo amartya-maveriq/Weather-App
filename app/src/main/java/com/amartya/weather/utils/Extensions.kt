@@ -23,8 +23,8 @@ const val BASE_URL = "https://api.weatherapi.com/v1/"
 const val ERR_GENERIC = "An unknown error has occurred"
 const val PREF_UNIT = "com.amartya.weather.PREF_UNIT"
 const val PREF_LOC_NAME = "com.amartya.weather.PREF_LOC_NAME"
-const val UNIT_IMPERIAL = "com.amartya.weather.UNIT_IMPERIAL"
-const val UNIT_METRIC = "com.amartya.weather.UNIT_METRIC"
+const val UNIT_IMPERIAL = "Imperial (e.g, °F, miles etc.)"
+const val UNIT_METRIC = "Metric (e.g, °C, kms etc.)"
 const val DB_NAME = "app_database"
 const val CHANNEL_ID = "com.amartya.weather.CHANNEL_ID"
 const val CHANNEL_NAME = "com.amartya.weather.CHANNEL_NAME"
@@ -84,7 +84,7 @@ fun logError(msg: String) {
  * normalize image url
  */
 fun String.normalizeUrl(): String {
-    return "https:/$this"
+    return "https:$this"
 }
 
 /**
