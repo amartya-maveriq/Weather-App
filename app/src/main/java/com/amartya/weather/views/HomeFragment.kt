@@ -1,6 +1,7 @@
 package com.amartya.weather.views
 
 import android.Manifest
+import android.content.SharedPreferences
 import android.content.pm.PackageManager
 import android.os.Bundle
 import android.view.View
@@ -22,6 +23,7 @@ import com.amartya.weather.models.Forecast
 import com.amartya.weather.models.Weather
 import com.amartya.weather.sealed.UiState
 import com.amartya.weather.utils.ERR_GENERIC
+import com.amartya.weather.utils.PREF_LOC_NAME
 import com.amartya.weather.utils.clickWithDebounce
 import com.amartya.weather.utils.getCurrentTemp
 import com.amartya.weather.utils.getFeelsLikeTemp
@@ -35,7 +37,6 @@ import com.amartya.weather.utils.showSnackbar
 import com.amartya.weather.viewmodels.MainViewModel
 import com.bumptech.glide.Glide
 import com.google.android.gms.location.FusedLocationProviderClient
-import com.google.android.gms.location.LocationServices
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
@@ -45,7 +46,8 @@ import javax.inject.Inject
 class HomeFragment : Fragment(R.layout.fragment_home) {
 
     private lateinit var binding: FragmentHomeBinding
-    private lateinit var fusedLocationClient: FusedLocationProviderClient
+    @Inject lateinit var fusedLocationClient: FusedLocationProviderClient
+    @Inject lateinit var sharedPreferences: SharedPreferences
     private val viewModel by activityViewModels<MainViewModel>()
 
     @Inject
@@ -53,8 +55,6 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         binding = FragmentHomeBinding.bind(view)
-
-        fusedLocationClient = LocationServices.getFusedLocationProviderClient(requireContext())
 
         if (hasLocationPermission()) {
             getLastKnownLocation()
@@ -86,6 +86,7 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
                         when (uiState) {
                             is UiState.Success -> {
                                 (uiState.obj as? Weather)?.let { weather ->
+                                    saveToPref(weather.location?.name)
                                     setCurrentWeather(weather)
                                     setForecast(weather.forecast)
                                     setUvIndex(weather.current?.uv)
@@ -110,6 +111,12 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
                     }
                 }
             }
+        }
+    }
+
+    private fun saveToPref(locationName: String?) {
+        locationName?.let {
+            sharedPreferences.edit().putString(PREF_LOC_NAME, it).apply()
         }
     }
 
@@ -177,9 +184,7 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
     }
 
     private fun getLastKnownLocation() {
-        if (this::fusedLocationClient.isInitialized) {
-            viewModel.getUserLocation(fusedLocationClient)
-        }
+        viewModel.getUserLocation(fusedLocationClient)
     }
 
     private fun hasLocationPermission(): Boolean = ActivityCompat.checkSelfPermission(

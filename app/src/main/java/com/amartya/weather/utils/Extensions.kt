@@ -12,6 +12,7 @@ import com.amartya.weather.models.Current
 import com.amartya.weather.models.Day
 import com.google.android.material.snackbar.BaseTransientBottomBar
 import com.google.android.material.snackbar.Snackbar
+import java.util.*
 
 
 // list of constants used in the app
@@ -21,8 +22,13 @@ const val API_KEY = "c39bba18a6e9481f80f163931222705"
 const val BASE_URL = "https://api.weatherapi.com/v1/"
 const val ERR_GENERIC = "An unknown error has occurred"
 const val PREF_UNIT = "com.amartya.weather.PREF_UNIT"
+const val PREF_LOC_NAME = "com.amartya.weather.PREF_LOC_NAME"
 const val UNIT_IMPERIAL = "com.amartya.weather.UNIT_IMPERIAL"
 const val UNIT_METRIC = "com.amartya.weather.UNIT_METRIC"
+const val DB_NAME = "app_database"
+const val CHANNEL_ID = "com.amartya.weather.CHANNEL_ID"
+const val CHANNEL_NAME = "com.amartya.weather.CHANNEL_NAME"
+const val CHANNEL_DESC = "Weather App Channel"
 
 /**
  * Prevent any view to be clicked twice accidentally withing one second
@@ -147,4 +153,18 @@ fun getWindSpeed(current: Current?, unit: String): String = when(unit) {
 fun getVisibility(current: Current?, unit: String): String = when(unit) {
     UNIT_IMPERIAL -> (current?.visMiles ?: 0.0).toString() + " mi"
     else -> (current?.visKm ?: 0.0).toString() + " km"
+}
+
+/**
+ * Get time in millis for everyday at 6
+ */
+fun getTimeMillisForSix(): Long {
+    val cal = Calendar.getInstance()
+    cal.set(Calendar.HOUR_OF_DAY, 6)
+    cal.set(Calendar.MINUTE, 0)
+    cal.set(Calendar.SECOND, 0)
+    if (cal.before(Calendar.getInstance())) {
+        cal.add(Calendar.DATE, 1)
+    }
+    return cal.timeInMillis
 }
