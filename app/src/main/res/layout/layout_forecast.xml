@@ -17,6 +17,7 @@
             android:layout_margin="8dp"
             android:textSize="17sp"
             android:drawablePadding="5dp"
+            android:textAllCaps="true"
             app:drawableStartCompat="@drawable/ic_baseline_calendar_month_24" />
 
         <androidx.recyclerview.widget.RecyclerView

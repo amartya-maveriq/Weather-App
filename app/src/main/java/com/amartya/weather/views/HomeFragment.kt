@@ -16,12 +16,16 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.amartya.weather.R
 import com.amartya.weather.adapters.ForecastAdapter
 import com.amartya.weather.databinding.FragmentHomeBinding
+import com.amartya.weather.models.Current
 import com.amartya.weather.models.Forecast
 import com.amartya.weather.models.Weather
 import com.amartya.weather.sealed.UiState
 import com.amartya.weather.utils.ERR_GENERIC
 import com.amartya.weather.utils.getCurrentTemp
 import com.amartya.weather.utils.getFeelsLikeTemp
+import com.amartya.weather.utils.getUvIndexDesc
+import com.amartya.weather.utils.getVisibility
+import com.amartya.weather.utils.getWindSpeed
 import com.amartya.weather.utils.logDebug
 import com.amartya.weather.utils.logError
 import com.amartya.weather.utils.normalizeUrl
@@ -77,6 +81,10 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
                                 (uiState.obj as? Weather)?.let { weather ->
                                     setCurrentWeather(weather)
                                     setForecast(weather.forecast)
+                                    setUvIndex(weather.current?.uv)
+                                    setHumidity(weather.current?.humidity)
+                                    setVisibility(weather.current)
+                                    setWind(weather.current)
                                 }
                                 viewModel.resetWeatherFlow()
                             }
@@ -135,6 +143,30 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
             }
 
         }
+    }
+
+    private fun setUvIndex(uvIndex: Int?) {
+        with(binding.layoutUv) {
+            tvUvIndex.text = uvIndex?.toString() ?: "--"
+            tvUvIndexDesc.text = getUvIndexDesc(uvIndex)
+        }
+    }
+
+    private fun setHumidity(humidity: Int?) {
+        with(binding.layoutHumidity) {
+            tvUvIndex.text = "${humidity?.toString() ?: "--"}%"
+        }
+    }
+
+    private fun setWind(current: Current?) {
+        with(binding.layoutWind) {
+            tvWind.text = getWindSpeed(current, appUnit)
+            tvWindDir.text = "Direction ${current?.windDir ?: "N/A"}"
+        }
+    }
+
+    private fun setVisibility(current: Current?) {
+        binding.layoutVisibility.tvVisibility.text = getVisibility(current, appUnit)
     }
 
     private fun getLastKnownLocation() {

@@ -10,4 +10,8 @@
     <string name="add_new">Add new</string>
     <string name="close">Close</string>
     <string name="three_day_forecast">3-day forecast</string>
+    <string name="uv_index">UV Index</string>
+    <string name="humidity">Humidity</string>
+    <string name="wind">Wind</string>
+    <string name="visibility">visibility</string>
 </resources>

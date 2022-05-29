@@ -120,3 +120,31 @@ fun getMinTemp(day: Day?, unit: String): String {
         else -> "L " + (day?.mintempC ?: 0.0).toString() + "°C"
     }
 }
+
+/**
+ * Get UV desc
+ */
+fun getUvIndexDesc(uvIndex: Int?): String = when(uvIndex) {
+    in 0..2 -> "Low"
+    in 3..5 -> "Moderate"
+    in 6..7 -> "High"
+    in 8..10 -> "Very High"
+    in 11..15 -> "Extreme"
+    else -> "Not found"
+}
+
+/**
+ * Get wind speed
+ */
+fun getWindSpeed(current: Current?, unit: String): String = when(unit) {
+    UNIT_IMPERIAL -> (current?.windMph ?: 0.0).toString() + " mph"
+    else -> (current?.windKph ?: 0.0).toString() + " kph"
+}
+
+/**
+ * Get visibility
+ */
+fun getVisibility(current: Current?, unit: String): String = when(unit) {
+    UNIT_IMPERIAL -> (current?.visMiles ?: 0.0).toString() + " mi"
+    else -> (current?.visKm ?: 0.0).toString() + " km"
+}
