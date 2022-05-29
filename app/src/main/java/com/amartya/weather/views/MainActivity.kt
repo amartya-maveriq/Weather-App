@@ -1,17 +1,14 @@
 package com.amartya.weather.views
 
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import androidx.activity.viewModels
+import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.isVisible
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
-import androidx.navigation.Navigation
-import androidx.navigation.ui.setupWithNavController
-import com.amartya.weather.R
-import com.amartya.weather.sealed.UiState
 import com.amartya.weather.databinding.ActivityMainBinding
+import com.amartya.weather.sealed.UiState
 import com.amartya.weather.viewmodels.MainViewModel
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.collect
@@ -28,12 +25,12 @@ class MainActivity : AppCompatActivity() {
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        binding.bottomNavMain.setupWithNavController(
-            Navigation.findNavController(
-                this,
-                R.id.fragment_nav_host_main
-            )
-        )
+//        binding.bottomNavMain.setupWithNavController(
+//            Navigation.findNavController(
+//                this,
+//                R.id.fragment_nav_host_main
+//            )
+//        )
 
         observeViewModel()
     }
