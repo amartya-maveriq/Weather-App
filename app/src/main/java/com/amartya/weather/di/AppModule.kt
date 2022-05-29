@@ -15,6 +15,8 @@ import com.amartya.weather.utils.CHANNEL_ID
 import com.amartya.weather.utils.CHANNEL_NAME
 import com.amartya.weather.utils.DB_NAME
 import com.amartya.weather.utils.PREF_UNIT
+import com.bumptech.glide.Glide
+import com.bumptech.glide.RequestManager
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
 import dagger.Module
@@ -29,6 +31,10 @@ import javax.inject.Singleton
 @Module
 @InstallIn(SingletonComponent::class)
 object AppModule {
+
+    @Singleton
+    @Provides
+    fun getRequestManager(@ApplicationContext context: Context): RequestManager = Glide.with(context)
 
     @Singleton
     @Provides

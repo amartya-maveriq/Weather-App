@@ -1,10 +1,11 @@
 package com.amartya.weather.views
 
 import android.os.Bundle
-import android.view.LayoutInflater
 import android.view.View
-import android.view.ViewGroup
+import android.widget.TextView
 import androidx.core.content.ContextCompat
+import androidx.core.view.isVisible
+import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
@@ -12,7 +13,7 @@ import androidx.lifecycle.repeatOnLifecycle
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.amartya.weather.R
 import com.amartya.weather.adapters.ForecastAdapter
-import com.amartya.weather.databinding.FragmentCityDetailBinding
+import com.amartya.weather.databinding.FragmentCityDetailsBinding
 import com.amartya.weather.models.Current
 import com.amartya.weather.models.Forecast
 import com.amartya.weather.models.Location
@@ -25,41 +26,51 @@ import com.amartya.weather.utils.getFeelsLikeTemp
 import com.amartya.weather.utils.getUvIndexDesc
 import com.amartya.weather.utils.getVisibility
 import com.amartya.weather.utils.getWindSpeed
-import com.amartya.weather.utils.logDebug
 import com.amartya.weather.utils.normalizeUrl
 import com.amartya.weather.utils.showSnackbar
 import com.amartya.weather.viewmodels.MainViewModel
-import com.bumptech.glide.Glide
-import com.google.android.material.bottomsheet.BottomSheetDialogFragment
+import com.bumptech.glide.RequestManager
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @AndroidEntryPoint
-class CityDetailFragment(
-    private val location: Location
-): BottomSheetDialogFragment() {
+class CityDetailsFragment : Fragment(R.layout.fragment_city_details) {
 
     private val viewModel by activityViewModels<MainViewModel>()
-    private lateinit var binding: FragmentCityDetailBinding
+    private lateinit var binding: FragmentCityDetailsBinding
 
-    @Inject lateinit var appUnit: String
+    @Inject
+    lateinit var appUnit: String
 
-    override fun onCreateView(
-        inflater: LayoutInflater,
-        container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View {
-        binding = FragmentCityDetailBinding.inflate(inflater)
-        return binding.root
+    @Inject
+    lateinit var requestManager: RequestManager
+
+    private lateinit var location: Location
+
+    private val forecastAdapter by lazy {
+        ForecastAdapter(
+            requestManager = requestManager,
+            appUnit = appUnit
+        )
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        location = viewModel.selectedLocation
+        binding = FragmentCityDetailsBinding.bind(view)
         binding.fabAddFav.clickWithDebounce {
             viewModel.addToFavoriteCities(location)
-            this.dismiss()
+            requireActivity().onBackPressed()
         }
+        binding.ivBack.clickWithDebounce {
+            requireActivity().onBackPressed()
+        }
+        binding.layoutForecast.rvForecast.apply {
+            layoutManager = LinearLayoutManager(requireContext())
+            adapter = forecastAdapter
+        }
+        viewModel.checkForCity(location.name)
         viewModel.fetchWeather(locationName = location.name)
         observeViewModel()
     }
@@ -83,7 +94,7 @@ class CityDetailFragment(
                             }
                             is UiState.Error -> {
                                 showSnackbar(
-                                    binding.root,
+                                    requireView(),
                                     uiState.throwable.message ?: ERR_GENERIC,
                                     false
                                 )
@@ -93,6 +104,11 @@ class CityDetailFragment(
                                 // added to avoid warning
                             }
                         }
+                    }
+                }
+                launch {
+                    viewModel.exists.observe(viewLifecycleOwner) { exists ->
+                        binding.fabAddFav.isVisible = !exists
                     }
                 }
             }
@@ -105,7 +121,7 @@ class CityDetailFragment(
             tvLocationTemp.text = getCurrentTemp(
                 weather.current, appUnit
             )
-            Glide.with(requireContext())
+            requestManager
                 .load(weather.current?.condition?.icon?.normalizeUrl())
                 .into(ivWeatherIcon)
                 .onLoadFailed(
@@ -122,19 +138,8 @@ class CityDetailFragment(
     }
 
     private fun setForecast(forecast: Forecast?) {
-        with(binding.layoutForecast) {
-            forecast?.forecastday?.let { days ->
-                logDebug("size: ${days.size}")
-                rvForecast.apply {
-                    layoutManager = LinearLayoutManager(requireContext())
-                    adapter = ForecastAdapter(
-                        forecastDays = days,
-                        requestManager = Glide.with(requireContext()),
-                        appUnit = appUnit
-                    )
-                }
-            }
-
+        forecast?.forecastday?.let { days ->
+            forecastAdapter.setDays(days)
         }
     }
 
@@ -143,6 +148,10 @@ class CityDetailFragment(
             tvUvIndex.text = uvIndex?.toString() ?: "--"
             tvUvIndexDesc.text = getUvIndexDesc(uvIndex)
         }
+        binding.layoutUv.root.findViewById<TextView>(R.id.tv_uv_index).text =
+            uvIndex?.toString() ?: "--"
+        binding.layoutUv.root.findViewById<TextView>(R.id.tv_uv_index_desc).text =
+            getUvIndexDesc(uvIndex)
     }
 
     private fun setHumidity(humidity: Int?) {

@@ -34,6 +34,9 @@ class MainViewModel @Inject constructor(
     private val _location = MutableLiveData<Location?>()
     val location: LiveData<Location?> = _location
 
+    private val _exists = MutableLiveData<Boolean>()
+    val exists: LiveData<Boolean> = _exists
+
     private val _weatherFlow = MutableStateFlow<UiState>(UiState.Idle)
     val weatherFlow: StateFlow<UiState> = _weatherFlow
 
@@ -42,6 +45,8 @@ class MainViewModel @Inject constructor(
 
     private val _searchResults = MutableLiveData<List<com.amartya.weather.models.Location>?>()
     val searchResults: LiveData<List<com.amartya.weather.models.Location>?> = _searchResults
+
+    var selectedLocation = com.amartya.weather.models.Location(name = "")
 
     @SuppressLint("MissingPermission")
     fun getUserLocation(fusedLocationProviderClient: FusedLocationProviderClient) {
@@ -131,6 +136,18 @@ class MainViewModel @Inject constructor(
                 weatherRepository.deleteFromFavCities(location)
             }.onFailure {
                 logError(it.message ?: ERR_GENERIC)
+            }
+        }
+    }
+
+    /**
+     * Check if city exists in DB
+     */
+    fun checkForCity(locationName: String) {
+        viewModelScope.launch {
+            runCatching {
+                _exists.postValue(
+                    weatherRepository.getFavoriteCities().firstOrNull { it.name == locationName } != null)
             }
         }
     }

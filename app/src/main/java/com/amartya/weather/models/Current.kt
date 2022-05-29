@@ -21,8 +21,8 @@ data class Current(
     @SerializedName("cloud"              ) var cloud            : Int?       = null,
     @SerializedName("feelslike_c"        ) var feelslikeC       : Double?    = null,
     @SerializedName("feelslike_f"        ) var feelslikeF       : Double?    = null,
-    @SerializedName("vis_km"             ) var visKm            : Int?       = null,
-    @SerializedName("vis_miles"          ) var visMiles         : Int?       = null,
+    @SerializedName("vis_km"             ) var visKm            : Double?       = null,
+    @SerializedName("vis_miles"          ) var visMiles         : Double?       = null,
     @SerializedName("uv"                 ) var uv               : Int?       = null,
     @SerializedName("gust_mph"           ) var gustMph          : Double?    = null,
     @SerializedName("gust_kph"           ) var gustKph          : Double?    = null

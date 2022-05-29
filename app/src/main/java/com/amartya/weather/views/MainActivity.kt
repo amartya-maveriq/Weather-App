@@ -70,9 +70,7 @@ class MainActivity : AppCompatActivity() {
             is UiState.Loading -> {
                 binding.progressBar.isVisible = true
             }
-            else -> {
-                // added to avoid warning
-            }
+            else -> Unit
         }
     }
 }

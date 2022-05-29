@@ -30,12 +30,11 @@ import com.amartya.weather.utils.getFeelsLikeTemp
 import com.amartya.weather.utils.getUvIndexDesc
 import com.amartya.weather.utils.getVisibility
 import com.amartya.weather.utils.getWindSpeed
-import com.amartya.weather.utils.logDebug
 import com.amartya.weather.utils.logError
 import com.amartya.weather.utils.normalizeUrl
 import com.amartya.weather.utils.showSnackbar
 import com.amartya.weather.viewmodels.MainViewModel
-import com.bumptech.glide.Glide
+import com.bumptech.glide.RequestManager
 import com.google.android.gms.location.FusedLocationProviderClient
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.collect
@@ -46,9 +45,22 @@ import javax.inject.Inject
 class HomeFragment : Fragment(R.layout.fragment_home) {
 
     private lateinit var binding: FragmentHomeBinding
-    @Inject lateinit var fusedLocationClient: FusedLocationProviderClient
-    @Inject lateinit var sharedPreferences: SharedPreferences
+
+    @Inject
+    lateinit var fusedLocationClient: FusedLocationProviderClient
+
+    @Inject
+    lateinit var requestManager: RequestManager
+
+    @Inject
+    lateinit var sharedPreferences: SharedPreferences
     private val viewModel by activityViewModels<MainViewModel>()
+    private val forecastAdapter by lazy {
+        ForecastAdapter(
+            requestManager = requestManager,
+            appUnit = appUnit
+        )
+    }
 
     @Inject
     lateinit var appUnit: String
@@ -62,6 +74,12 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
             locationPermissionRequest.launch(arrayOf(Manifest.permission.ACCESS_COARSE_LOCATION))
         }
 
+        binding.layoutForecast.rvForecast.apply {
+            layoutManager = LinearLayoutManager(requireContext())
+            setHasFixedSize(true)
+            adapter = forecastAdapter
+        }
+
         binding.ivList.clickWithDebounce {
             requireView().findNavController()
                 .navigate(HomeFragmentDirections.actionHomeFragmentToCitiesFragment())
@@ -71,7 +89,7 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
     }
 
     private fun observeViewModel() {
-        lifecycleScope.launch {
+        viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
                 launch {
                     viewModel.location.observe(requireActivity()) { location ->
@@ -104,9 +122,7 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
                                 )
                                 viewModel.resetWeatherFlow()
                             }
-                            else -> {
-                                // added to avoid warning
-                            }
+                            else -> Unit
                         }
                     }
                 }
@@ -126,8 +142,9 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
             tvLocationTemp.text = getCurrentTemp(
                 weather.current, appUnit
             )
-            Glide.with(requireContext())
-                .load(weather.current?.condition?.icon?.normalizeUrl())
+            val url = weather.current?.condition?.icon?.normalizeUrl()
+            requestManager
+                .load(url)
                 .into(ivWeatherIcon)
                 .onLoadFailed(
                     ContextCompat.getDrawable(
@@ -143,19 +160,8 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
     }
 
     private fun setForecast(forecast: Forecast?) {
-        with(binding.layoutForecast) {
-            forecast?.forecastday?.let { days ->
-                logDebug("size: ${days.size}")
-                rvForecast.apply {
-                    layoutManager = LinearLayoutManager(requireContext())
-                    adapter = ForecastAdapter(
-                        forecastDays = days,
-                        requestManager = Glide.with(requireContext()),
-                        appUnit = appUnit
-                    )
-                }
-            }
-
+        forecast?.forecastday?.let { days ->
+            forecastAdapter.setDays(days)
         }
     }
 

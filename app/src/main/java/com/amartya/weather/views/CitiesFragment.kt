@@ -9,6 +9,7 @@ import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
+import androidx.navigation.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.amartya.weather.R
 import com.amartya.weather.adapters.CitiesAdapter
@@ -110,9 +111,8 @@ class CitiesFragment : Fragment(R.layout.fragment_cities), SearchFragment.Search
     }
 
     private fun openCityDetail(location: Location) {
-        CityDetailFragment(location).show(
-            requireActivity().supportFragmentManager,
-            CityDetailFragment::class.java.simpleName
-        )
+        viewModel.selectedLocation = location
+        requireView().findNavController()
+            .navigate(CitiesFragmentDirections.actionCitiesFragmentToCityDetailsFragment())
     }
 }

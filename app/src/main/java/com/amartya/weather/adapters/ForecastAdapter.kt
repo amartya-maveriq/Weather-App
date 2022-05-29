@@ -1,5 +1,6 @@
 package com.amartya.weather.adapters
 
+import android.annotation.SuppressLint
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
@@ -11,10 +12,19 @@ import com.amartya.weather.utils.normalizeUrl
 import com.bumptech.glide.RequestManager
 
 class ForecastAdapter(
-    private val forecastDays: List<Forecastday>,
+    private val forecastDays: MutableList<Forecastday> = mutableListOf(),
     private val requestManager: RequestManager,
     private val appUnit: String
 ) : RecyclerView.Adapter<ForecastAdapter.ForecastViewHolder>() {
+
+    @SuppressLint("NotifyDataSetChanged")
+    fun setDays(daysList: List<Forecastday>) {
+        forecastDays.apply {
+            clear()
+            addAll(daysList)
+        }
+        notifyDataSetChanged()
+    }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ForecastViewHolder {
         return ForecastViewHolder(

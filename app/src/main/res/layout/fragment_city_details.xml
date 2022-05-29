@@ -6,7 +6,7 @@
     android:layout_height="match_parent"
     android:background="@drawable/bg_blue"
     android:fillViewport="true"
-    tools:context=".views.CityDetailFragment">
+    tools:context=".views.CityDetailsFragment">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
@@ -33,12 +33,23 @@
             android:orientation="vertical"
             app:layout_constraintGuide_end="16dp" />
 
+        <ImageView
+            android:id="@+id/iv_back"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:padding="16dp"
+            android:src="@drawable/ic_baseline_arrow_back_24"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:tint="@color/white"
+            tools:ignore="ContentDescription" />
+
         <com.google.android.material.floatingactionbutton.FloatingActionButton
             android:id="@+id/fab_add_fav"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:backgroundTint="@color/negative_red"
             android:src="@drawable/ic_baseline_favorite_24"
+            app:backgroundTint="@color/negative_red"
             app:layout_constraintBottom_toTopOf="@+id/layout_forecast"
             app:layout_constraintEnd_toEndOf="@id/guideline_right"
             app:layout_constraintTop_toTopOf="@id/guideline_top"
