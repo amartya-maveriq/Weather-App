@@ -12,6 +12,7 @@ import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
+import androidx.navigation.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.amartya.weather.R
 import com.amartya.weather.adapters.ForecastAdapter
@@ -21,6 +22,7 @@ import com.amartya.weather.models.Forecast
 import com.amartya.weather.models.Weather
 import com.amartya.weather.sealed.UiState
 import com.amartya.weather.utils.ERR_GENERIC
+import com.amartya.weather.utils.clickWithDebounce
 import com.amartya.weather.utils.getCurrentTemp
 import com.amartya.weather.utils.getFeelsLikeTemp
 import com.amartya.weather.utils.getUvIndexDesc
@@ -58,6 +60,11 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
             getLastKnownLocation()
         } else {
             locationPermissionRequest.launch(arrayOf(Manifest.permission.ACCESS_COARSE_LOCATION))
+        }
+
+        binding.ivList.clickWithDebounce {
+            requireView().findNavController()
+                .navigate(HomeFragmentDirections.actionHomeFragmentToCitiesFragment())
         }
 
         observeViewModel()

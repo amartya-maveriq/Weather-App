@@ -22,8 +22,14 @@ import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
-class SearchFragment : BottomSheetDialogFragment(),
+class SearchFragment(
+    private val listener: SearchCompleteListener
+) : BottomSheetDialogFragment(),
     LocationSearchResultAdapter.SearchResultClickListener {
+
+    interface SearchCompleteListener {
+        fun onSearchCompleted(location: Location)
+    }
 
     private val viewModel by activityViewModels<MainViewModel>()
     private val locationSearchResultAdapter: LocationSearchResultAdapter by lazy {
@@ -70,6 +76,7 @@ class SearchFragment : BottomSheetDialogFragment(),
     }
 
     override fun onSearchResultClicked(location: Location) {
-        //
+        this.dismiss()
+        listener.onSearchCompleted(location)
     }
 }

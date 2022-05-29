@@ -24,7 +24,7 @@ import kotlinx.coroutines.launch
  * Marked as `Favorites` in the app
  */
 @AndroidEntryPoint
-class CitiesFragment: Fragment(R.layout.fragment_cities) {
+class CitiesFragment : Fragment(R.layout.fragment_cities), SearchFragment.SearchCompleteListener {
 
     private lateinit var binding: FragmentCitiesBinding
     private val viewModel by activityViewModels<MainViewModel>()
@@ -35,10 +35,14 @@ class CitiesFragment: Fragment(R.layout.fragment_cities) {
         viewModel.getFavoriteCities()
 
         binding.fabAddNewLocation.clickWithDebounce {
-            SearchFragment().show(
+            SearchFragment(this).show(
                 requireActivity().supportFragmentManager,
                 SearchFragment::class.java.simpleName
             )
+        }
+
+        binding.ivBack.clickWithDebounce {
+            requireActivity().onBackPressed()
         }
 
         observeViewModel()
@@ -48,7 +52,7 @@ class CitiesFragment: Fragment(R.layout.fragment_cities) {
         lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
                 viewModel.citiesFlow.collect { uiState ->
-                    when(uiState) {
+                    when (uiState) {
                         is UiState.Success -> {
                             val locations = (uiState.obj as? List<*>)?.filterIsInstance<Location>()
                             binding.tvNoLocation.isVisible = locations.isNullOrEmpty()
@@ -69,5 +73,12 @@ class CitiesFragment: Fragment(R.layout.fragment_cities) {
                 }
             }
         }
+    }
+
+    override fun onSearchCompleted(location: Location) {
+        CityDetailFragment(location).show(
+            requireActivity().supportFragmentManager,
+            CityDetailFragment::class.java.simpleName
+        )
     }
 }

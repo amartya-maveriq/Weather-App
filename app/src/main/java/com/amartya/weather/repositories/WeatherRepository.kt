@@ -28,10 +28,29 @@ class WeatherRepository @Inject constructor(
     }
 
     /**
+     * Get the current weather forecast for a particular location name
+     *
+     * params
+     * `locationName`: `String`
+     */
+    suspend fun getWeather(locationName: String) = withContext(IO) {
+        apiService.getForecast(
+            latLng = locationName
+        )
+    }
+
+    /**
      * Get the list of cities marked as favorites
      */
     suspend fun getFavoriteCities() = withContext(IO) {
         locationDao.getAll()
+    }
+
+    /**
+     * Add to list of favorite cities
+     */
+    suspend fun addToFavoriteCities(location: com.amartya.weather.models.Location) = withContext(IO) {
+        locationDao.addNew(location)
     }
 
     /**

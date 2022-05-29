@@ -25,13 +25,6 @@ class MainActivity : AppCompatActivity() {
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-//        binding.bottomNavMain.setupWithNavController(
-//            Navigation.findNavController(
-//                this,
-//                R.id.fragment_nav_host_main
-//            )
-//        )
-
         observeViewModel()
     }
 

@@ -77,6 +77,26 @@ class MainViewModel @Inject constructor(
     }
 
     /**
+     * Get the current weather forecast for a particular location name
+     */
+    fun fetchWeather(locationName: String) {
+        viewModelScope.launch {
+            _weatherFlow.value = UiState.Loading
+            val api = weatherRepository.getWeather(locationName)
+            api.enqueue(object : Callback<Weather> {
+                override fun onResponse(call: Call<Weather>, response: Response<Weather>) {
+                    _weatherFlow.value = UiState.Success(response.body())
+                }
+
+                override fun onFailure(call: Call<Weather>, t: Throwable) {
+                    Log.e("MSG", "err: ${t.message}")
+                    _weatherFlow.value = UiState.Error(t)
+                }
+            })
+        }
+    }
+
+    /**
      * Fetch list of favorite cities
      */
     fun getFavoriteCities() {
@@ -85,6 +105,19 @@ class MainViewModel @Inject constructor(
                 _citiesFlow.value = UiState.Success(weatherRepository.getFavoriteCities())
             }.onFailure {
                 _citiesFlow.value = UiState.Error(it)
+            }
+        }
+    }
+
+    /**
+     * Add to list of favorite cities
+     */
+    fun addToFavoriteCities(location: com.amartya.weather.models.Location) {
+        viewModelScope.launch {
+            runCatching {
+                weatherRepository.addToFavoriteCities(location)
+            }.onFailure {
+                logError(it.message ?: ERR_GENERIC)
             }
         }
     }
