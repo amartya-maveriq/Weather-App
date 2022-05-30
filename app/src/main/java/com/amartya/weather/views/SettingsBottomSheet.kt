@@ -6,9 +6,9 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.AdapterView
-import android.widget.ArrayAdapter
-import android.widget.Spinner
+import android.widget.RadioButton
+import android.widget.RadioGroup
+import androidx.core.view.children
 import com.amartya.weather.R
 import com.amartya.weather.utils.PREF_UNIT
 import com.amartya.weather.utils.UNIT_IMPERIAL
@@ -38,19 +38,21 @@ class SettingsBottomSheet(
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        val units = arrayOf(UNIT_METRIC, UNIT_IMPERIAL)
-        view.findViewById<Spinner>(R.id.spinner_app_unit).apply {
-            adapter =
-                ArrayAdapter(requireContext(), android.R.layout.simple_spinner_dropdown_item, units)
-            setSelection(units.indexOf(sharedPreferences.getString(PREF_UNIT, "") ?: UNIT_METRIC))
-            onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
-                override fun onItemSelected(p0: AdapterView<*>?, p1: View?, i: Int, p3: Long) {
-                    sharedPreferences.edit().putString(PREF_UNIT, units[i]).apply()
-                }
-
-                override fun onNothingSelected(p0: AdapterView<*>?) {
-                    // nothing to do
-                }
+        val rgUnits = view.findViewById<RadioGroup>(R.id.rg_units)
+        view.findViewById<RadioButton>(R.id.rb_unit_metric).also {
+            it.text = UNIT_METRIC
+        }
+        view.findViewById<RadioButton>(R.id.rb_unit_imperial).also {
+            it.text = UNIT_IMPERIAL
+        }
+        when (sharedPreferences.getString(PREF_UNIT, UNIT_METRIC)) {
+            UNIT_METRIC -> (rgUnits.children.first() as RadioButton).isChecked = true
+            UNIT_IMPERIAL -> (rgUnits.children.last() as RadioButton).isChecked = true
+        }
+        rgUnits.setOnCheckedChangeListener { _, i ->
+            when (i) {
+                R.id.rb_unit_metric -> sharedPreferences.edit().putString(PREF_UNIT, UNIT_METRIC).apply()
+                R.id.rb_unit_imperial -> sharedPreferences.edit().putString(PREF_UNIT, UNIT_IMPERIAL).apply()
             }
         }
     }
