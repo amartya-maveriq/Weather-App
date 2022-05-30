@@ -33,3 +33,14 @@ There are 5 screens in total, namely:
 3. Search page from where users can search for any location/city of their choice
 4. Location details page where weather data for that location is found
 5. Settings bottom sheet where users can change unit of measurement in app (metric to imperial & vice versa)
+
+-----
+
+### What could have been done also...
+
+Well, the app could have 
+- Some unit tests
+- A CSV file exporter for weather data
+- some more re-usability of code
+
+👍👍 These stuffs will be included soon...
