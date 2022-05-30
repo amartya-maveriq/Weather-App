@@ -1,6 +1,7 @@
 package com.amartya.weather.utils
 
 import android.content.Context
+import android.content.SharedPreferences
 import android.os.SystemClock
 import android.util.Log
 import android.view.View
@@ -167,4 +168,8 @@ fun getTimeMillisForSix(): Long {
         cal.add(Calendar.DATE, 1)
     }
     return cal.timeInMillis
+}
+
+fun SharedPreferences.getAppUnit(): String {
+    return getString(PREF_UNIT, UNIT_METRIC) ?: UNIT_METRIC
 }

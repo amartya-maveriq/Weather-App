@@ -157,7 +157,7 @@ class CityDetailsFragment : Fragment(R.layout.fragment_city_details) {
 
     private fun setHumidity(humidity: Int?) {
         with(binding.layoutHumidity) {
-            tvUvIndex.text = "${humidity?.toString() ?: "--"}%"
+            tvHumidity.text = "${humidity?.toString() ?: "--"}%"
         }
     }
 

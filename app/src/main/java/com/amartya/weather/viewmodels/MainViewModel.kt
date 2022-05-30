@@ -7,6 +7,7 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.amartya.weather.models.HomePage
 import com.amartya.weather.models.Weather
 import com.amartya.weather.repositories.WeatherRepository
 import com.amartya.weather.sealed.UiState
@@ -37,6 +38,9 @@ class MainViewModel @Inject constructor(
     private val _exists = MutableLiveData<Boolean>()
     val exists: LiveData<Boolean> = _exists
 
+    private val _oldData = MutableLiveData<HomePage?>()
+    val oldData: LiveData<HomePage?> = _oldData
+
     private val _weatherFlow = MutableStateFlow<UiState>(UiState.Idle)
     val weatherFlow: StateFlow<UiState> = _weatherFlow
 
@@ -58,6 +62,28 @@ class MainViewModel @Inject constructor(
                     }
                     _location.postValue(it)
                 }
+        }
+    }
+
+    /**
+     * Get last saved home page data
+     */
+    fun getWeatherData(name: String) {
+        viewModelScope.launch {
+            runCatching {
+                _oldData.postValue(weatherRepository.getWeatherData(name).firstOrNull())
+            }.onFailure {
+                logError(it.message ?: ERR_GENERIC)
+            }
+        }
+    }
+
+    /**
+     * Save latest homepage to DB
+     */
+    fun saveWeatherData(homePage: HomePage) {
+        viewModelScope.launch {
+            weatherRepository.saveWeatherData(homePage)
         }
     }
 
@@ -147,7 +173,8 @@ class MainViewModel @Inject constructor(
         viewModelScope.launch {
             runCatching {
                 _exists.postValue(
-                    weatherRepository.getFavoriteCities().firstOrNull { it.name == locationName } != null)
+                    weatherRepository.getFavoriteCities()
+                        .firstOrNull { it.name == locationName } != null)
             }
         }
     }

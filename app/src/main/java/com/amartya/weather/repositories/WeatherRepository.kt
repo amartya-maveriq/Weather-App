@@ -2,7 +2,9 @@ package com.amartya.weather.repositories
 
 import android.location.Location
 import com.amartya.weather.api.ApiService
+import com.amartya.weather.db.HomePageDao
 import com.amartya.weather.db.LocationDao
+import com.amartya.weather.models.HomePage
 import kotlinx.coroutines.Dispatchers.IO
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
@@ -12,8 +14,23 @@ import javax.inject.Inject
  */
 class WeatherRepository @Inject constructor(
     private val locationDao: LocationDao,
+    private val homePageDao: HomePageDao,
     private val apiService: ApiService
 ) {
+
+    /**
+     * Get last saved home page data
+     */
+    suspend fun getWeatherData(name: String) = withContext(IO) {
+        homePageDao.getAll(name)
+    }
+
+    /**
+     * Save latest to DB
+     */
+    suspend fun saveWeatherData(homePage: HomePage) = withContext(IO) {
+        homePageDao.insert(homePage)
+    }
 
     /**
      * Get the current weather forecast for a particular location

@@ -20,6 +20,7 @@ import com.amartya.weather.adapters.ForecastAdapter
 import com.amartya.weather.databinding.FragmentHomeBinding
 import com.amartya.weather.models.Current
 import com.amartya.weather.models.Forecast
+import com.amartya.weather.models.HomePage
 import com.amartya.weather.models.Weather
 import com.amartya.weather.sealed.UiState
 import com.amartya.weather.utils.ERR_GENERIC
@@ -27,6 +28,7 @@ import com.amartya.weather.utils.PREF_LOC_NAME
 import com.amartya.weather.utils.PREF_UNIT
 import com.amartya.weather.utils.UNIT_METRIC
 import com.amartya.weather.utils.clickWithDebounce
+import com.amartya.weather.utils.getAppUnit
 import com.amartya.weather.utils.getCurrentTemp
 import com.amartya.weather.utils.getFeelsLikeTemp
 import com.amartya.weather.utils.getUvIndexDesc
@@ -56,6 +58,7 @@ class HomeFragment : Fragment(R.layout.fragment_home), SettingsBottomSheet.Dismi
 
     @Inject
     lateinit var sharedPreferences: SharedPreferences
+
     private val viewModel by activityViewModels<MainViewModel>()
     private val forecastAdapter by lazy {
         ForecastAdapter(
@@ -66,6 +69,11 @@ class HomeFragment : Fragment(R.layout.fragment_home), SettingsBottomSheet.Dismi
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         binding = FragmentHomeBinding.bind(view)
+
+        val savedName = sharedPreferences.getString(PREF_LOC_NAME, "")
+        if (!savedName.isNullOrBlank()) {
+            viewModel.getWeatherData(savedName)
+        }
 
         if (hasLocationPermission()) {
             getLastKnownLocation()
@@ -98,7 +106,15 @@ class HomeFragment : Fragment(R.layout.fragment_home), SettingsBottomSheet.Dismi
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
                 launch {
-                    viewModel.location.observe(requireActivity()) { location ->
+                    viewModel.oldData.observe(viewLifecycleOwner) { homePage ->
+                        homePage?.let {
+                            quickLoadUi(it)
+                        }
+                    }
+                }
+
+                launch {
+                    viewModel.location.observe(viewLifecycleOwner) { location ->
                         location?.let {
                             viewModel.fetchWeather(it)
                         }
@@ -111,6 +127,7 @@ class HomeFragment : Fragment(R.layout.fragment_home), SettingsBottomSheet.Dismi
                             is UiState.Success -> {
                                 (uiState.obj as? Weather)?.let { weather ->
                                     saveToPref(weather.location?.name)
+                                    saveSnapshot(weather)
                                     setCurrentWeather(weather)
                                     setForecast(weather.forecast)
                                     setUvIndex(weather.current?.uv)
@@ -182,7 +199,7 @@ class HomeFragment : Fragment(R.layout.fragment_home), SettingsBottomSheet.Dismi
 
     private fun setHumidity(humidity: Int?) {
         with(binding.layoutHumidity) {
-            tvUvIndex.text = "${humidity?.toString() ?: "--"}%"
+            tvHumidity.text = "${humidity?.toString() ?: "--"}%"
         }
     }
 
@@ -196,6 +213,43 @@ class HomeFragment : Fragment(R.layout.fragment_home), SettingsBottomSheet.Dismi
     private fun setVisibility(current: Current?) {
         binding.layoutVisibility.tvVisibility.text =
             getVisibility(current, sharedPreferences.getString(PREF_UNIT, "") ?: "")
+    }
+
+    private fun saveSnapshot(weather: Weather) {
+        HomePage.mapFromWeather(weather).also {
+            viewModel.saveWeatherData(it)
+        }
+    }
+
+    private fun quickLoadUi(homePage: HomePage) {
+        with(binding.layoutCurrentWeather) {
+            tvLocationName.text = homePage.name
+            tvLocationCountry.text = homePage.country
+            requestManager.load(homePage.icon).into(ivWeatherIcon).onLoadFailed(
+                ContextCompat.getDrawable(
+                    requireContext(),
+                    R.drawable.ic_baseline_error_24
+                )
+            )
+            tvLocationForecast.text = homePage.shortForecast
+            tvFeelsLike.text = when (sharedPreferences.getAppUnit()) {
+                UNIT_METRIC -> homePage.feelsLikeC
+                else -> homePage.feelsLikeF
+            }
+        }
+        with(binding.layoutUv) {
+            tvUvIndex.text = homePage.uvIndex
+            tvUvIndexDesc.text = getUvIndexDesc(homePage.uvIndex.toInt())
+        }
+        binding.layoutHumidity.tvHumidity.text = homePage.humidity
+        binding.layoutVisibility.tvVisibility.text = when (sharedPreferences.getAppUnit()) {
+            UNIT_METRIC -> homePage.visibilityKm
+            else -> homePage.visibilityMi
+        }
+        binding.layoutWind.tvWind.text = when (sharedPreferences.getAppUnit()) {
+            UNIT_METRIC -> homePage.windKph
+            else -> homePage.windMph
+        }
     }
 
     private fun getLastKnownLocation() {

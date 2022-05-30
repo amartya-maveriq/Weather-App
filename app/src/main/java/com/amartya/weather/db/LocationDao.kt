@@ -15,6 +15,6 @@ interface LocationDao {
     @Insert
     fun addNew(location: Location)
 
-    @Delete()
+    @Delete
     fun delete(location: Location)
 }

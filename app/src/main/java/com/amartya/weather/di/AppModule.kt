@@ -34,7 +34,8 @@ object AppModule {
 
     @Singleton
     @Provides
-    fun getRequestManager(@ApplicationContext context: Context): RequestManager = Glide.with(context)
+    fun getRequestManager(@ApplicationContext context: Context): RequestManager =
+        Glide.with(context)
 
     @Singleton
     @Provides
@@ -48,7 +49,7 @@ object AppModule {
         context.applicationContext,
         AppDatabase::class.java,
         DB_NAME
-    ).build()
+    ).fallbackToDestructiveMigration().build()
 
     @Singleton
     @Provides
@@ -61,6 +62,10 @@ object AppModule {
     @Singleton
     @Provides
     fun provideLocationDao(db: AppDatabase) = db.locationDao()
+
+    @Singleton
+    @Provides
+    fun provideHomePageDao(db: AppDatabase) = db.homepageDao()
 
     @Singleton
     @Provides
