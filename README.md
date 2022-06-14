@@ -18,10 +18,10 @@ Well, it tells the weather. Duh. Plus some more cool stuffs. Like,
 
 <table>
   <tr>
-    <td><img src="https://user-images.githubusercontent.com/81750154/173509134-690dd3ee-da4c-4262-918f-5562b01c5468.JPG" width="360" height="500" /></td>
-    <td><img src="https://user-images.githubusercontent.com/81750154/173509152-e4f5e12a-e185-4ea5-aef2-ddc1a43a7bbb.JPG" width="360" height="500" /></td>
-    <td> <img src="https://user-images.githubusercontent.com/81750154/173509173-a237a6f4-4b34-4a6d-a4b9-b57bc1f73aa8.JPG" width="360" height="500" /></td>
-    <td> <img src="https://user-images.githubusercontent.com/81750154/173509196-e5544171-47d8-4970-92d7-caf510c0e78d.JPG" width="360" height="500" /></td>
+    <td><img src="https://user-images.githubusercontent.com/81750154/173509134-690dd3ee-da4c-4262-918f-5562b01c5468.JPG" width="200" height="300" /></td>
+    <td><img src="https://user-images.githubusercontent.com/81750154/173509152-e4f5e12a-e185-4ea5-aef2-ddc1a43a7bbb.JPG" width="200" height="300" /></td>
+    <td> <img src="https://user-images.githubusercontent.com/81750154/173509173-a237a6f4-4b34-4a6d-a4b9-b57bc1f73aa8.JPG" width="200" height="300" /></td>
+    <td> <img src="https://user-images.githubusercontent.com/81750154/173509196-e5544171-47d8-4970-92d7-caf510c0e78d.JPG" width="200" height="300" /></td>
   </tr>
 </table>
 
